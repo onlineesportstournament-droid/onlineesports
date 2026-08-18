@@ -1,2 +1,1622 @@
-# onlineesports
-onlineesports
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#03050b">
+  <title>eFootball 2027 Mobile Championship</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:#02040a;
+      --panel:#07101d;
+      --panel-2:#0a1322;
+      --line:rgba(150,167,196,.16);
+      --line-strong:rgba(150,167,196,.28);
+      --text:#f8fbff;
+      --muted:#8592aa;
+      --red:#ff4056;
+      --red2:#ff1744;
+      --cyan:#29d6ff;
+      --purple:#8a4cff;
+      --gold:#ffc447;
+      --green:#38e2a4;
+      --safe:env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing:border-box; }
+    html, body { margin:0; min-height:100%; background:#000; }
+    body {
+      color:var(--text);
+      font-family:"Inter",sans-serif;
+      -webkit-tap-highlight-color:transparent;
+      overflow-x:hidden;
+    }
+    button, input { font:inherit; }
+    button { cursor:pointer; }
+    img { display:block; max-width:100%; }
+    .hidden { display:none !important; }
+
+    .app {
+      width:100%;
+      max-width:480px;
+      min-height:100svh;
+      margin:0 auto;
+      position:relative;
+      overflow:hidden;
+      background:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.018) 1px, transparent 1px),
+        radial-gradient(circle at 50% -10%,rgba(138,76,255,.14),transparent 34%),
+        linear-gradient(180deg,#070b16 0%,#02040b 36%,#010207 100%);
+      background-size:30px 30px,30px 30px,100% 100%,100% 100%;
+      border-left:1px solid rgba(255,64,86,.12);
+      border-right:1px solid rgba(255,64,86,.12);
+      box-shadow:0 0 80px rgba(0,0,0,.92);
+    }
+
+    .hud { font-family:"Chakra Petch",sans-serif; }
+    .display { font-family:"Orbitron",sans-serif; }
+
+    /* ================================================================
+       LOGIN — intentionally designed as a dedicated mobile esports cover
+       ================================================================ */
+    .login {
+      position:fixed;
+      inset:0;
+      width:min(100%,480px);
+      margin:auto;
+      z-index:200;
+      background:#02040a;
+      overflow:auto;
+      overscroll-behavior:none;
+      padding-bottom:calc(18px + var(--safe));
+    }
+
+    .login-hero {
+      min-height:56svh;
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      padding:22px 18px 42px;
+      background:
+        linear-gradient(180deg,rgba(1,2,8,.08) 0%,rgba(1,2,8,.28) 48%,#02040a 100%),
+        radial-gradient(circle at 10% 7%,rgba(22,215,255,.23),transparent 33%),
+        radial-gradient(circle at 90% 22%,rgba(189,0,255,.22),transparent 34%),
+        linear-gradient(145deg,#06152b 0%,#09031c 45%,#17060f 100%);
+    }
+    .login-hero::before {
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(rgba(41,214,255,.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,64,86,.05) 1px,transparent 1px);
+      background-size:28px 28px;
+      transform:perspective(380px) rotateX(58deg) scale(1.4) translateY(19%);
+      transform-origin:center bottom;
+      opacity:.7;
+      pointer-events:none;
+    }
+    .login-hero::after {
+      content:"";
+      position:absolute; left:-15%; right:-15%; bottom:18px; height:1px;
+      background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),var(--red),transparent);
+      box-shadow:0 0 18px rgba(41,214,255,.55);
+    }
+
+    .login-glow {
+      position:absolute;border-radius:50%;filter:blur(54px);opacity:.42;pointer-events:none;
+      animation:floatGlow 7s ease-in-out infinite alternate;
+    }
+    .login-glow.g1 { width:180px;height:180px;background:#0468ff;top:4%;left:-80px; }
+    .login-glow.g2 { width:185px;height:185px;background:#b300ef;top:10%;right:-90px;animation-delay:-2s; }
+    .login-glow.g3 { width:150px;height:150px;background:#ff173d;bottom:8%;right:15%;animation-delay:-4s; }
+
+    .top-status {
+      position:absolute;left:18px;right:18px;top:max(16px,env(safe-area-inset-top));
+      display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:4;
+    }
+    .live-chip,.season-chip {
+      border:1px solid rgba(255,255,255,.13);
+      background:rgba(3,7,17,.52);
+      backdrop-filter:blur(12px);
+      border-radius:999px;
+      padding:7px 10px;
+      font:700 9px "Chakra Petch",sans-serif;
+      letter-spacing:.11em;
+      text-transform:uppercase;
+      color:#b5c2d8;
+    }
+    .live-chip { color:#a6f5d5; display:flex;align-items:center;gap:7px; }
+    .live-dot {
+      width:7px;height:7px;border-radius:50%;background:var(--green);
+      box-shadow:0 0 0 4px rgba(56,226,164,.08),0 0 14px rgba(56,226,164,.65);
+      animation:pulseDot 1.8s ease-in-out infinite;
+    }
+
+    .brand-lockup {
+      position:relative;z-index:3;text-align:center;
+      padding-top:72px;
+    }
+    .brand-symbol-large {
+      width:124px;height:112px;object-fit:contain;margin:0 auto 6px;
+      filter:drop-shadow(0 0 20px rgba(255,255,255,.18)) drop-shadow(0 0 42px rgba(110,78,255,.18));
+      animation:logoHover 4s ease-in-out infinite;
+    }
+    .brand-word {
+      margin:0;
+      font:900 clamp(27px,8.7vw,40px)/1 "Orbitron",sans-serif;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+    .brand-year {
+      color:#fff;
+      text-shadow:0 0 22px rgba(255,255,255,.12);
+    }
+    .brand-sub {
+      margin-top:9px;
+      color:#ff6173;
+      font:700 11px "Chakra Petch",sans-serif;
+      letter-spacing:.28em;
+      text-transform:uppercase;
+    }
+
+    .hero-tags {
+      position:relative;z-index:3;
+      display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+      margin-top:22px;
+    }
+    .hero-tag {
+      min-width:0;
+      border:1px solid rgba(255,255,255,.11);
+      background:rgba(4,8,17,.48);
+      backdrop-filter:blur(12px);
+      border-radius:12px;
+      padding:9px 7px;
+      text-align:center;
+    }
+    .hero-tag b {
+      display:block;color:#fff;font:700 11px "Chakra Petch",sans-serif;white-space:nowrap;
+    }
+    .hero-tag span {
+      display:block;margin-top:2px;color:#67748a;font-size:8px;text-transform:uppercase;letter-spacing:.08em;
+    }
+
+    .login-panel {
+      position:relative;
+      z-index:5;
+      margin:-22px 14px 0;
+      border:1px solid rgba(151,168,197,.18);
+      background:
+        linear-gradient(180deg,rgba(14,22,39,.98),rgba(5,8,15,.99));
+      border-radius:24px;
+      padding:18px;
+      box-shadow:0 -12px 50px rgba(0,0,0,.18),0 22px 70px rgba(0,0,0,.52);
+      overflow:hidden;
+    }
+    .login-panel::before {
+      content:"";
+      position:absolute;left:20%;right:20%;top:0;height:1px;
+      background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent);
+      box-shadow:0 0 20px rgba(41,214,255,.5);
+    }
+    .panel-kicker {
+      display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;
+    }
+    .panel-kicker .mini {
+      color:#ff6375;font:700 9px "Chakra Petch",sans-serif;letter-spacing:.18em;text-transform:uppercase;
+    }
+    .verified-pill {
+      border:1px solid rgba(56,226,164,.2);
+      background:rgba(56,226,164,.06);
+      border-radius:999px;
+      padding:5px 8px;
+      color:#73e9bd;
+      font:700 8px "Chakra Petch",sans-serif;
+      letter-spacing:.08em;text-transform:uppercase;
+    }
+    .login-panel h2 {
+      margin:0;
+      font:800 21px "Orbitron",sans-serif;
+      letter-spacing:.02em;
+    }
+    .login-panel p {
+      margin:7px 0 14px;color:#8995aa;font-size:11px;line-height:1.55;
+    }
+
+    .phone-box {
+      display:flex;align-items:center;gap:8px;
+      border:1px solid rgba(152,169,197,.2);
+      background:#030710;
+      border-radius:15px;
+      padding:5px;
+      transition:.2s ease;
+    }
+    .phone-box:focus-within {
+      border-color:rgba(41,214,255,.65);
+      box-shadow:0 0 0 3px rgba(41,214,255,.06),0 0 24px rgba(41,214,255,.08);
+    }
+    .cc {
+      padding:11px 10px;
+      border-radius:11px;
+      background:#0b1424;
+      color:#bdefff;
+      font:700 13px "Chakra Petch",sans-serif;
+    }
+    .phone {
+      width:100%;min-width:0;border:0;outline:0;background:transparent;color:white;
+      padding:11px 7px;
+      font:600 15px "Chakra Petch",sans-serif;
+      letter-spacing:.08em;
+    }
+    .phone::placeholder { color:#4f5c70;letter-spacing:.02em; }
+
+    .enter-btn {
+      width:100%;
+      position:relative;
+      overflow:hidden;
+      border:0;border-radius:15px;
+      margin-top:11px;
+      padding:14px 15px;
+      color:white;
+      background:linear-gradient(90deg,#ef1d42 0%,#af2fde 50%,#00a9d9 100%);
+      box-shadow:0 14px 34px rgba(124,52,232,.26);
+      font:800 12px "Orbitron",sans-serif;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      transition:transform .14s ease,filter .18s ease;
+    }
+    .enter-btn::after {
+      content:"";
+      position:absolute;top:-100%;bottom:-100%;width:40%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+      transform:skewX(-22deg) translateX(-240%);
+      animation:buttonSweep 3.7s ease-in-out infinite;
+    }
+    .enter-btn:active { transform:scale(.985);filter:brightness(1.08); }
+
+    .security {
+      margin-top:11px;
+      display:flex;align-items:center;justify-content:center;gap:7px;
+      color:#5f6b7e;font-size:9px;
+    }
+
+    .login-footer {
+      padding:14px 18px 0;
+      text-align:center;
+      color:#404b5e;
+      font:600 8px "Chakra Petch",sans-serif;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    /* ======================== APP HEADER ======================== */
+    .header {
+      position:sticky;top:0;z-index:80;
+      min-height:70px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:11px 13px max(11px,env(safe-area-inset-top));
+      background:rgba(4,8,16,.91);
+      border-bottom:1px solid var(--line);
+      backdrop-filter:blur(16px);
+    }
+    .header-brand { display:flex;align-items:center;gap:9px;min-width:0; }
+    .header-logo {
+      width:40px;height:36px;object-fit:contain;flex:0 0 auto;
+      filter:drop-shadow(0 0 8px rgba(255,255,255,.18));
+    }
+    .header-copy { min-width:0; }
+    .header-copy h1 {
+      margin:0;
+      font:800 clamp(11px,3.5vw,15px) "Orbitron",sans-serif;
+      letter-spacing:.045em;white-space:nowrap;
+    }
+    .header-copy p {
+      margin:3px 0 0;
+      color:#ff5667;
+      font:700 9px "Chakra Petch",sans-serif;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .badge {
+      flex:0 0 auto;
+      max-width:143px;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      border:1px solid rgba(151,168,197,.22);
+      border-radius:999px;
+      background:#0b1424;
+      color:#c8d2e3;
+      padding:8px 10px;
+      font:700 11px "Chakra Petch",sans-serif;
+    }
+    .back {
+      width:36px;height:36px;border:1px solid var(--line);
+      border-radius:11px;background:#0b1424;color:white;
+      display:grid;place-items:center;font-size:18px;
+    }
+
+    /* ======================== MAIN ======================== */
+    main { padding:17px 13px calc(100px + var(--safe)); }
+    .section-head {
+      display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;
+    }
+    .section-head h2 {
+      margin:0;color:#9eabc0;
+      font:700 11px "Chakra Petch",sans-serif;
+      letter-spacing:.14em;text-transform:uppercase;
+    }
+    .active-chip {
+      padding:7px 9px;
+      border:1px solid rgba(255,64,86,.38);
+      border-radius:8px;
+      background:rgba(113,14,26,.25);
+      color:#ff7181;
+      font:700 9px "Chakra Petch",sans-serif;
+      letter-spacing:.06em;text-transform:uppercase;
+      white-space:nowrap;
+    }
+
+    .t-card {
+      border-radius:22px;overflow:hidden;
+      border:1px solid rgba(255,64,86,.26);
+      background:#070c16;
+      box-shadow:0 22px 55px rgba(0,0,0,.34);
+      transition:transform .15s ease,border-color .2s ease;
+    }
+    .t-card:active { transform:scale(.992);border-color:rgba(255,64,86,.58); }
+    .t-hero {
+      min-height:150px;
+      position:relative;overflow:hidden;
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+      padding:19px 16px;
+      background:
+        radial-gradient(circle at 88% 22%,rgba(255,69,83,.35),transparent 36%),
+        radial-gradient(circle at 4% 62%,rgba(129,0,182,.7),transparent 43%),
+        linear-gradient(120deg,#15031f,#060918 54%,#261016);
+    }
+    .t-hero::after {
+      content:"";position:absolute;left:-10%;right:-10%;bottom:-34px;height:70px;
+      background:linear-gradient(90deg,transparent,rgba(41,214,255,.08),transparent);
+      transform:rotate(-4deg);
+    }
+    .stage {
+      display:inline-block;
+      border:1px solid rgba(41,214,255,.45);
+      background:rgba(0,150,191,.18);
+      color:#46ddff;
+      border-radius:7px;
+      padding:6px 8px;
+      font:700 9px "Chakra Petch",sans-serif;
+      letter-spacing:.14em;text-transform:uppercase;
+    }
+    .t-hero h3 {
+      position:relative;z-index:2;
+      margin:10px 0 0;
+      font:800 clamp(17px,5.4vw,23px) "Orbitron",sans-serif;
+    }
+    .t-logo {
+      position:relative;z-index:2;
+      width:76px;height:70px;object-fit:contain;opacity:.92;
+      filter:drop-shadow(0 0 15px rgba(255,255,255,.12));
+    }
+    .t-body { padding:15px; }
+    .phase {
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+      margin-bottom:14px;
+    }
+    .phase-left {
+      min-width:0;display:flex;align-items:center;gap:7px;
+      padding:8px 10px;
+      clip-path:polygon(7px 0,100% 0,calc(100% - 10px) 100%,0 100%);
+      background:linear-gradient(90deg,rgba(118,15,26,.82),rgba(30,7,11,.52));
+      color:#ff8e9b;
+      font:700 9px "Chakra Petch",sans-serif;
+      letter-spacing:.14em;text-transform:uppercase;
+    }
+    .phase-dot {
+      width:8px;height:8px;border-radius:50%;background:var(--red);
+      box-shadow:0 0 0 4px rgba(255,64,86,.1),0 0 12px rgba(255,64,86,.55);
+      animation:pulseDot 1.8s ease-in-out infinite;
+    }
+    .seed {
+      border:1px solid rgba(255,64,86,.35);border-radius:5px;padding:3px 5px;
+      color:#ff6374;font-size:8px;white-space:nowrap;
+    }
+    .prize {
+      flex:0 0 auto;border:1px solid rgba(255,196,71,.4);border-radius:7px;
+      background:rgba(110,67,7,.18);color:#ffc84f;padding:8px 9px;
+      font:700 11px "Chakra Petch",sans-serif;
+    }
+    .event-title {
+      margin:0;
+      font:800 clamp(20px,6.2vw,28px)/1.45 "Orbitron",sans-serif;
+    }
+    .event-sub { margin:5px 0 0;color:#8e9ab0;font-size:11px;line-height:1.5; }
+    .schedule {
+      margin-top:14px;
+      border:1px solid rgba(151,168,197,.18);
+      border-radius:15px;
+      background:#02050a;
+      padding:12px 13px;
+      display:flex;align-items:center;justify-content:space-between;gap:9px;
+      font:700 10px "Chakra Petch",sans-serif;
+    }
+    .entry { color:var(--green);white-space:nowrap; }
+    .t-footer {
+      margin-top:13px;padding-top:12px;border-top:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+      font:700 9px "Chakra Petch",sans-serif;
+      text-transform:uppercase;letter-spacing:.07em;
+    }
+    .t-footer span:first-child { color:#7f8ca2; }
+    .t-footer span:last-child { color:#ff5265;white-space:nowrap; }
+
+    .panel {
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:linear-gradient(180deg,#0b1423,#050810);
+      padding:15px;
+      box-shadow:0 14px 38px rgba(0,0,0,.22);
+    }
+    .registered { border-color:rgba(56,226,164,.24);margin-bottom:15px; }
+    .reg-status {
+      color:var(--green);
+      font:700 9px "Chakra Petch",sans-serif;
+      letter-spacing:.13em;text-transform:uppercase;
+    }
+    .grid2 { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
+    .stat {
+      border:1px solid var(--line);border-radius:13px;background:#02060d;padding:11px;
+    }
+    .stat small {
+      display:block;margin-bottom:4px;color:#6d788c;font-size:8px;
+      letter-spacing:.11em;text-transform:uppercase;
+    }
+    .stat strong { font:700 13px "Chakra Petch",sans-serif; }
+
+    .detail h2 {
+      margin:8px 0 4px;
+      font:800 19px/1.35 "Orbitron",sans-serif;
+    }
+    .detail p { margin:0;color:var(--muted);font-size:11px; }
+    .money { font:800 23px "Chakra Petch",sans-serif; }
+    .gold { color:var(--gold); }
+    .actions { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px; }
+    .secondary {
+      border:1px solid var(--line);border-radius:11px;background:#101827;color:#eef3fa;
+      padding:10px 9px;font:700 9px "Chakra Petch",sans-serif;
+      letter-spacing:.08em;text-transform:uppercase;
+    }
+
+    .form-group { margin-top:12px; }
+    label { display:block;margin-bottom:6px;color:#b5bfd0;font-size:10px;font-weight:700; }
+    .field {
+      width:100%;border:1px solid var(--line);outline:0;
+      border-radius:13px;background:#02060d;color:white;padding:12px 13px;font-size:12px;
+    }
+    .field:focus { border-color:rgba(41,214,255,.55);box-shadow:0 0 0 3px rgba(41,214,255,.05); }
+    .field[readonly] { opacity:.62; }
+    .pay-box {
+      margin-top:13px;border:1px solid rgba(255,64,86,.22);border-radius:14px;
+      background:#02050b;padding:12px;
+    }
+    .upi-row {
+      margin-top:9px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    .copy {
+      border:1px solid rgba(255,64,86,.45);border-radius:10px;background:#bd2035;color:white;
+      padding:9px 10px;font:700 9px "Chakra Petch",sans-serif;text-transform:uppercase;
+    }
+
+    .timeline { display:grid;gap:10px; }
+    .time-card {
+      border:1px solid var(--line);border-left:3px solid var(--red);
+      border-radius:14px;background:#08101d;padding:13px;
+    }
+    .time-card.gold-line { border-left-color:var(--gold); }
+    .time-card.green-line { border-left-color:var(--green); }
+    .time-card strong { display:block;font-size:12px; }
+    .time-card p { margin:6px 0 0;color:var(--muted);font-size:10px;line-height:1.5; }
+
+    .avatar {
+      width:66px;height:66px;margin:0 auto 11px;border-radius:20px;
+      display:grid;place-items:center;font-size:28px;
+      border:1px solid rgba(255,64,86,.28);background:rgba(255,64,86,.07);
+    }
+    .profile-phone { text-align:center;font:700 20px "Chakra Petch",sans-serif; }
+    .verified { text-align:center;margin-top:4px;color:var(--green);font-size:9px; }
+
+    /* ======================== BOTTOM NAV ======================== */
+    .nav {
+      position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+      width:min(100%,480px);
+      z-index:90;
+      display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+      padding:9px 16px calc(9px + var(--safe));
+      background:rgba(5,9,18,.95);
+      border-top:1px solid var(--line);
+      backdrop-filter:blur(16px);
+    }
+    .nav button {
+      border:0;background:transparent;color:#7f8ba0;
+      padding:5px;
+      display:grid;place-items:center;gap:3px;
+      font:700 9px "Chakra Petch",sans-serif;
+      text-transform:uppercase;letter-spacing:.08em;
+    }
+    .nav .ico { font-size:17px;line-height:1; }
+    .nav button.active { color:#ff5365; }
+
+    /* ======================== MODALS ======================== */
+    .modal {
+      position:fixed;inset:0;z-index:260;
+      background:rgba(0,0,0,.84);backdrop-filter:blur(10px);
+      display:grid;place-items:center;padding:15px;
+    }
+    .modal-card {
+      width:min(100%,420px);max-height:84svh;overflow:auto;
+      border:1px solid var(--line);border-radius:20px;background:#09111e;padding:15px;
+      box-shadow:0 30px 80px rgba(0,0,0,.7);
+    }
+    .modal-head { display:flex;align-items:flex-start;justify-content:space-between;gap:10px; }
+    .modal-head h3 { margin:0;font:800 17px "Chakra Petch",sans-serif; }
+    .close { border:0;background:transparent;color:#92a0b6;font-size:19px; }
+    .rule {
+      margin-top:9px;border:1px solid var(--line);border-radius:12px;background:#02060d;padding:11px;
+    }
+    .rule strong { display:block;color:#ff6778;font:700 9px "Chakra Petch",sans-serif;text-transform:uppercase;letter-spacing:.1em; }
+    .rule p { margin:5px 0 0;color:#bcc5d2;font-size:10px;line-height:1.5; }
+
+    @keyframes pulseDot {
+      0%,100% { transform:scale(1);opacity:1; }
+      50% { transform:scale(.78);opacity:.6; }
+    }
+    @keyframes floatGlow {
+      from { transform:translate3d(0,0,0) scale(1); }
+      to { transform:translate3d(20px,18px,0) scale(1.12); }
+    }
+    @keyframes logoHover {
+      0%,100% { transform:translateY(0); }
+      50% { transform:translateY(-5px); }
+    }
+    @keyframes buttonSweep {
+      0%,55% { transform:skewX(-22deg) translateX(-240%); }
+      78%,100% { transform:skewX(-22deg) translateX(380%); }
+    }
+
+    @media (max-width:360px) {
+      .login-hero { min-height:54svh;padding-left:14px;padding-right:14px; }
+      .brand-symbol-large { width:108px;height:98px; }
+      .brand-word { font-size:25px; }
+      .hero-tags { gap:6px; }
+      .hero-tag b { font-size:10px; }
+      .login-panel { margin-left:10px;margin-right:10px;padding:15px; }
+      .header { padding-left:10px;padding-right:10px; }
+      .header-logo { width:34px;height:31px; }
+      .badge { max-width:112px;font-size:9px;padding:7px 8px; }
+      main { padding-left:10px;padding-right:10px; }
+      .schedule { flex-direction:column;align-items:flex-start; }
+      .phase { align-items:flex-start; }
+      .phase-left { font-size:8px;padding:7px 8px; }
+      .prize { font-size:10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,*::before,*::after { animation:none !important;scroll-behavior:auto !important; }
+    }
+  
+    /* ======================== INTERACTIVE MOBILE UPGRADE ======================== */
+    .tap-card {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    .tap-card::before {
+      content:"";
+      position:absolute;
+      inset:0;
+      background:radial-gradient(circle at var(--tap-x,50%) var(--tap-y,50%), rgba(255,255,255,.13), transparent 28%);
+      opacity:0;
+      transition:opacity .22s ease;
+      pointer-events:none;
+      z-index:3;
+    }
+    .tap-card.is-tapping::before { opacity:1; }
+
+    .t-card {
+      will-change:transform;
+    }
+    .t-card:hover { border-color:rgba(255,64,86,.48); }
+    .t-card.is-tapping {
+      transform:scale(.985) translateY(1px);
+      box-shadow:0 12px 32px rgba(0,0,0,.44);
+    }
+
+    .quick-actions {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:12px;
+    }
+    .quick-btn {
+      min-height:54px;
+      border:1px solid rgba(151,168,197,.16);
+      border-radius:14px;
+      background:linear-gradient(180deg,#0c1524,#07101c);
+      color:#dfe7f3;
+      padding:8px 7px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      font:700 9px "Chakra Petch",sans-serif;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      transition:transform .14s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease;
+      touch-action:manipulation;
+    }
+    .quick-btn .qico { font-size:17px; line-height:1; }
+    .quick-btn:active,
+    .quick-btn.is-tapping {
+      transform:scale(.96);
+      border-color:rgba(41,214,255,.45);
+      background:linear-gradient(180deg,#0f1a2c,#091421);
+      box-shadow:0 0 0 3px rgba(41,214,255,.05);
+    }
+    .quick-btn.primary {
+      border-color:rgba(255,64,86,.28);
+      background:linear-gradient(180deg,rgba(125,19,33,.36),rgba(27,8,13,.56));
+      color:#ff7f8d;
+    }
+
+    .register-strip {
+      margin-top:12px;
+      border:1px solid rgba(255,64,86,.24);
+      background:linear-gradient(90deg,rgba(126,18,31,.32),rgba(73,24,112,.22),rgba(0,117,152,.2));
+      border-radius:15px;
+      padding:11px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      position:relative;
+      overflow:hidden;
+    }
+    .register-strip::after {
+      content:"";
+      position:absolute;
+      top:-120%;
+      bottom:-120%;
+      width:34%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);
+      transform:skewX(-22deg) translateX(-260%);
+      animation:buttonSweep 4.2s ease-in-out infinite;
+    }
+    .register-strip strong {
+      font:800 10px "Orbitron",sans-serif;
+      letter-spacing:.06em;
+    }
+    .register-strip span {
+      color:#93a0b4;
+      font-size:9px;
+    }
+    .register-strip .go {
+      flex:0 0 auto;
+      min-width:38px;height:38px;border-radius:12px;
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      font-size:18px;
+      transition:transform .15s ease,background .15s ease;
+    }
+    .register-strip:active .go { transform:translateX(3px) scale(.96); background:rgba(255,255,255,.13); }
+
+    .mobile-dock-note {
+      display:none;
+      margin:10px 2px 0;
+      color:#5f6b7f;
+      text-align:center;
+      font-size:8px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    @media (max-width:420px) {
+      .section-head {
+        align-items:flex-start;
+      }
+      .active-chip {
+        padding:6px 7px;
+        font-size:8px;
+      }
+      .t-body { padding:14px; }
+      .quick-actions { gap:7px; }
+      .quick-btn { min-height:52px; }
+      .mobile-dock-note { display:block; }
+    }
+
+    @media (max-width:340px) {
+      .quick-actions {
+        grid-template-columns:1fr;
+      }
+      .quick-btn {
+        flex-direction:row;
+        min-height:46px;
+      }
+      .register-strip {
+        align-items:flex-start;
+      }
+    }
+
+
+    /* ======================== PRO ESPORTS REVAMP ======================== */
+    :root{
+      --pro-blue:#51d8ff;
+      --pro-violet:#8f63ff;
+      --pro-red:#ff4961;
+      --pro-gold:#ffc857;
+      --pro-surface:#08101d;
+      --pro-surface-2:#0d1626;
+      --pro-border:rgba(160,178,208,.15);
+    }
+
+    body{
+      background:
+        radial-gradient(circle at 50% -12%,rgba(63,96,255,.13),transparent 34%),
+        radial-gradient(circle at 100% 22%,rgba(255,73,97,.08),transparent 30%),
+        #010208;
+    }
+
+    .app{
+      background:
+        linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.014) 1px,transparent 1px),
+        radial-gradient(circle at 50% -8%,rgba(81,216,255,.08),transparent 26%),
+        linear-gradient(180deg,#060b15 0%,#03060d 48%,#010208 100%);
+      background-size:32px 32px,32px 32px,100% 100%,100% 100%;
+    }
+
+    .header{
+      min-height:74px;
+      background:linear-gradient(180deg,rgba(6,11,22,.96),rgba(5,9,18,.9));
+      border-bottom:1px solid rgba(150,167,196,.16);
+      box-shadow:0 10px 30px rgba(0,0,0,.24);
+    }
+
+    .header-copy h1{
+      letter-spacing:.055em;
+    }
+
+    .badge{
+      background:linear-gradient(180deg,#0d1728,#09111f);
+      border-color:rgba(150,167,196,.22);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+    }
+
+    .panel,
+    .t-card,
+    .time-card,
+    .registered,
+    .modal-card{
+      background:
+        linear-gradient(180deg,rgba(13,22,38,.96),rgba(5,9,16,.98));
+      border-color:var(--pro-border);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.025),
+        0 20px 44px rgba(0,0,0,.26);
+    }
+
+    .t-card{
+      border-color:rgba(255,73,97,.2);
+    }
+
+    .t-hero{
+      background:
+        linear-gradient(180deg,rgba(2,4,10,.02),rgba(2,4,10,.24)),
+        radial-gradient(circle at 85% 30%,rgba(255,73,97,.28),transparent 34%),
+        radial-gradient(circle at 7% 58%,rgba(130,41,205,.48),transparent 42%),
+        linear-gradient(125deg,#12051e 0%,#070b18 55%,#231016 100%);
+    }
+
+    .stage{
+      background:rgba(11,106,138,.18);
+      border-color:rgba(81,216,255,.42);
+      color:#67e1ff;
+      box-shadow:inset 0 0 18px rgba(81,216,255,.04);
+    }
+
+    .event-title{
+      letter-spacing:.015em;
+    }
+
+    .schedule{
+      background:linear-gradient(180deg,#040812,#02050a);
+      border-color:rgba(150,167,196,.2);
+    }
+
+    .quick-btn{
+      background:linear-gradient(180deg,#101929,#0a1220);
+      border-color:rgba(150,167,196,.16);
+    }
+
+    .quick-btn.primary{
+      background:linear-gradient(180deg,rgba(132,22,39,.4),rgba(49,9,18,.58));
+      border-color:rgba(255,73,97,.31);
+      color:#ff8995;
+    }
+
+    .register-strip{
+      background:
+        linear-gradient(90deg,rgba(101,15,28,.44),rgba(48,22,83,.38),rgba(7,83,106,.34));
+      border-color:rgba(255,73,97,.28);
+    }
+
+    .stat{
+      background:linear-gradient(180deg,#060a12,#03060c);
+      border-color:rgba(150,167,196,.15);
+    }
+
+    .actions .secondary,
+    .secondary{
+      background:linear-gradient(180deg,#111a2a,#0b1320);
+      border-color:rgba(150,167,196,.18);
+    }
+
+    .field{
+      background:#030711;
+      border-color:rgba(150,167,196,.18);
+    }
+
+    .pay-box{
+      background:
+        linear-gradient(180deg,rgba(83,16,27,.12),rgba(2,5,11,.94));
+      border-color:rgba(255,73,97,.22);
+    }
+
+    .payment-warning{
+      margin-top:12px;
+      padding:11px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,200,87,.25);
+      background:linear-gradient(180deg,rgba(112,72,12,.14),rgba(29,20,5,.18));
+      color:#c7b27b;
+      font-size:9px;
+      line-height:1.55;
+    }
+    .payment-warning strong{
+      color:#ffd36e;
+    }
+
+    /* ===== Professional prize matrix ===== */
+    .prize-matrix{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .prize-summary{
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(255,200,87,.24);
+      border-radius:16px;
+      padding:14px;
+      background:
+        radial-gradient(circle at 86% 18%,rgba(255,200,87,.14),transparent 28%),
+        linear-gradient(180deg,#111722,#080d15);
+    }
+
+    .prize-summary::after{
+      content:"";
+      position:absolute;
+      right:-22px;
+      top:-36px;
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      border:1px solid rgba(255,200,87,.09);
+      box-shadow:
+        0 0 0 18px rgba(255,200,87,.025),
+        0 0 0 36px rgba(255,200,87,.015);
+      pointer-events:none;
+    }
+
+    .prize-summary-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      position:relative;
+      z-index:2;
+    }
+
+    .prize-summary-label{
+      color:#9ba6b8;
+      font:700 9px "Chakra Petch",sans-serif;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .prize-total{
+      color:#ffd36f;
+      font:800 31px/1 "Orbitron",sans-serif;
+      text-shadow:0 0 22px rgba(255,200,87,.14);
+    }
+
+    .prize-summary-note{
+      margin-top:8px;
+      color:#7d899c;
+      font-size:9px;
+      line-height:1.5;
+      position:relative;
+      z-index:2;
+    }
+
+    .podium-row{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      align-items:center;
+      gap:11px;
+      min-height:70px;
+      padding:12px;
+      border:1px solid var(--pro-border);
+      border-radius:14px;
+      background:linear-gradient(180deg,#0b1320,#060a12);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .podium-row.champion{
+      border-color:rgba(255,200,87,.26);
+      background:
+        linear-gradient(90deg,rgba(255,200,87,.07),transparent 35%),
+        linear-gradient(180deg,#101722,#070b12);
+    }
+
+    .podium-row.runner{
+      border-color:rgba(195,205,223,.18);
+    }
+
+    .podium-row.third{
+      border-color:rgba(203,137,80,.18);
+    }
+
+    .rank-medal{
+      width:43px;
+      height:43px;
+      display:grid;
+      place-items:center;
+      border-radius:12px;
+      font-size:19px;
+      background:#111a28;
+      border:1px solid rgba(255,255,255,.07);
+    }
+
+    .podium-row.champion .rank-medal{
+      background:rgba(255,200,87,.09);
+      border-color:rgba(255,200,87,.2);
+    }
+
+    .rank-copy strong{
+      display:block;
+      font:700 11px "Orbitron",sans-serif;
+      letter-spacing:.025em;
+    }
+
+    .rank-copy span{
+      display:block;
+      margin-top:3px;
+      color:#778398;
+      font-size:9px;
+    }
+
+    .rank-money{
+      text-align:right;
+    }
+
+    .rank-money b{
+      display:block;
+      font:800 20px "Chakra Petch",sans-serif;
+      color:white;
+    }
+
+    .champion .rank-money b{
+      color:#ffd36f;
+    }
+
+    .rank-money span{
+      color:#5f6a7d;
+      font-size:8px;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+    }
+
+    .matrix-footnote{
+      margin-top:10px;
+      padding:10px 11px;
+      border-radius:12px;
+      background:#050911;
+      border:1px solid rgba(150,167,196,.12);
+      color:#798597;
+      font-size:9px;
+      line-height:1.5;
+    }
+
+    @media (max-width:360px){
+      .prize-total{font-size:27px}
+      .podium-row{grid-template-columns:auto 1fr auto;gap:8px;padding:10px}
+      .rank-medal{width:39px;height:39px}
+      .rank-money b{font-size:18px}
+    }
+
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- ========================== LOGIN ========================== -->
+  <section id="authScreen" class="login">
+    <div class="login-hero">
+      <div class="login-glow g1"></div>
+      <div class="login-glow g2"></div>
+      <div class="login-glow g3"></div>
+
+      <div class="top-status">
+        <div class="live-chip"><span class="live-dot"></span> Esports Network Live</div>
+        <div class="season-chip">Season 27</div>
+      </div>
+
+      <div class="brand-lockup">
+        <img class="brand-symbol-large" src="data:image/png;base64,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" alt="eFootball symbol">
+        <h1 class="brand-word">EFOOTBALL <span class="brand-year">2027</span></h1>
+        <div class="brand-sub">Mobile Championship</div>
+
+        <div class="hero-tags">
+          <div class="hero-tag"><b>32</b><span>Seeds</span></div>
+          <div class="hero-tag"><b>₹850</b><span>Prize Pool</span></div>
+          <div class="hero-tag"><b>Mobile</b><span>Platform</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-panel">
+      <div class="panel-kicker">
+        <span class="mini">Player Terminal</span>
+        <span class="verified-pill">● Secure Access</span>
+      </div>
+
+      <h2>Enter the Arena</h2>
+      <p>Sign in with your WhatsApp number to register, view fixtures and manage your tournament slot.</p>
+
+      <div class="phone-box">
+        <span class="cc">+91</span>
+        <input id="loginPhone" class="phone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit WhatsApp number">
+      </div>
+
+      <button class="enter-btn" onclick="handleLogin()">Launch Player Access ➜</button>
+      <div class="security">🔒 Encrypted local player session • Mobile only</div>
+    </div>
+
+    <div class="login-footer">Professional Mobile Esports Tournament Operations</div>
+  </section>
+
+  <!-- ========================== HEADER ========================== -->
+  <header class="header">
+    <div class="header-brand">
+      <button id="backBtn" class="back hidden" onclick="switchView('tournaments')" aria-label="Go back">←</button>
+      <img id="headerLogo" class="header-logo" src="data:image/png;base64,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" alt="eFootball logo">
+      <div class="header-copy">
+        <h1 id="headerTitle">EFOOTBALL 2027</h1>
+        <p>Mobile Championship</p>
+      </div>
+    </div>
+    <div id="userBadge" class="badge">+91 ----------</div>
+  </header>
+
+  <main>
+    <!-- ========================== ARENA ========================== -->
+    <section id="viewTournaments">
+      <div id="activeRegContainer" class="panel registered hidden">
+        <div class="reg-status">● Slot Confirmed</div>
+        <h3 class="hud" style="margin:7px 0 11px;font-size:16px;">Currently Registered</h3>
+        <div class="grid2">
+          <div class="stat"><small>Player IGN</small><strong id="regPlayerIgn">---</strong></div>
+          <div class="stat"><small>Owner ID</small><strong id="regPlayerId">---</strong></div>
+        </div>
+        <p style="margin:10px 0 0;color:#8592a7;font-size:9px;line-height:1.55">
+          Verification pending. Send your payment screenshot to WhatsApp <b style="color:white">8479006531</b>.
+        </p>
+      </div>
+
+      <div class="section-head">
+        <h2>Upcoming Tournaments</h2>
+        <div class="active-chip">● 1 Tournament Active</div>
+      </div>
+
+      <article class="t-card tap-card" onclick="openTournamentDetail()">
+        <div class="t-hero">
+          <div style="position:relative;z-index:2">
+            <span class="stage">Official Mobile Stage</span>
+            <h3>EFOOTBALL 2027</h3>
+          </div>
+          <img class="t-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIgAAACPCAYAAAAhv5PqAAAMXElEQVR4nO2dW6wdVRnHf/u0Pb3YwqG0tA1BrEJqwYYHEi8PYiR4iw8Eoo3REDFaFC+h+EJEo1ESeTAhgWBUopYY8cGmMcEYL4QQS4Kp1zRFSimxltJyejvd7TmecziHfcaHbxaz9uw9a88+e82amd3vl+zMZc9ea82e/3zrW2u+taYRRREKtwDXAh8A5oERYKHL8l/AQyWVsRQaF5FAHgC+lfHdeWAC2DxA+rPAz4G/AY8PkE6lGGaBvAEs8ZxmExjLcVwENOL1Z4CbPZcjGCNlF8Aje5ALYz5FMBYvZ4Fpx3FGHDPAB+PyXIiXdxRUtkKouwV5Avh02YXok7PA5fH6Z4BflViWntRVILUstIOHgZ1lF6IbdRLILqSVkeVItvDvcxTJPLDM2p4GVpFUT5WgDj7IacRi3ImIYwH4J+IH2NRJHJCI4zBwBBEHJD7UF8soVJoqW5D/kfxpkAhiRQllKZNSLUoVLch25A6yxXECEYYtjiPU1xeZQc6pZe07FS8PpI6N4uNuCVCuDqpkQT4J/NraPoz0bl6sjAMbU/smgUtCFqIqAjF3yRKkV/PSHL+ZAVYWWagK8yBwf4iMyhbIQ8C98brdP6Dko3D/pEwfJELEcTDeVnHk40y8nEL+w0IfHpZlQSLaLcY+4D1lFKRmHAOuovOZ0F6kj8g7oQXyTeCrJM7XIWBLyAIMOd6rnKW+E3TwKnBlap9WK/3Trce4hfTERsA9wCO+MgtlQexMJoC11vYsF1/n12IxTd8zwDrkv3sa+Lh1zEL8/QYfGYYQyAwigClgtbV/DhgtOvMh5CCwNbWvifgkLwLvtPYPXOUULRC7f8NwkkTdJ4BNVOwBVQ2wb7a0Bba3jwJvGySjIgUS0Wk1qkyeqq5uT4xBLPXyxf64qH4Qo7qqieMw7c8/bAYRR1aaVWAU+Ppif1yEBYmA/cAN1nYVq5AppBWXJQxz0buJooU8FxnzXyyv2H7eoiyJb4GkE/sHcKPPDAakCayhftWET/q6WX0KJEIuwHLkIdop4DLao6aqxhQSkLQGaTa6sH2UulgQm1ngdeRBaG6R+BJIup/jNeD6eHsS8UWqVM10c0ibtF/wYQ1QaiLnmet6+HBS0wpbSyKOI4hqqyQO6LRqe4AdSDnNZ2X8aaQ+O+Ljp0IV1gP2NRpD+ku+k+eHg1oQ82MTcJvGxGyYh0xV4Eng1gLS3Qu8v4B0fZB2Vs16zxvXVzN3FfByl/0moMenOIzpn4yXc/HSpXTbAhQhDoCbrDwetcqXZjxjf7OAMhmMICLae697WodBBGInvgBcM0BaeXkM8Qn2I44lyAlPIRfGvii2KELzNSQ0sAH8lPYI/Dlr3Tj2EMbhbdDZZ+MUyWIFYic6O0A6/XIX8ofegIjC+AGmQ24N5Ykiix2IJf1KvP3WePkcUs4x4JeE6WzbhzTx96f235P1g8X4ILuQMSppvyLLD/GJ6VeZRgKO7PyrJAoXjwJ3IzfVJOLE92pi+6Jbp6V5Qtz1/1uMQOwfmMRDP6M4BVwRr9dFGGn2Ae8uIV/7ie8BYBvS2txMl/+yX4GUHQI/j9xxq4HnkZOrOyH/0+NI0JbdkrEt//1IxPyb9OM73Gutz5M4V+f7LeUALCPpdBsGcYCcS3qwVFGsRgQxSvfr9v30jn4sSK8DQ1Uzda1S8hDCmswB55CYHGM97Gm2wLqOeS3I0zmOKUIcTWv97wy3OKDz/LL6UgZhlCRgy1Qttg7aNJHXghQxnVM3jgJXd9m/HdgdIP+qEJHEnZZFA/JZkIhwLRRbHM/Gy49xcYkD5OKsQ5xKSAZLhS9IDgvSLa60aEydOOxVSi9OIw8/Rwgb/W9CRRu9LEiEXKzQATYqDmE9Uu1C2Lga0zN9W9mDt5WKU8UJZJQKoQJRnKhAFCcqEMWJCkRxogJRnKhAFCcqEMWJCkRxogJRnKhAFCcqEMWJCkRxogJRnKhAFCcqEMWJPdPyw8ALyJgXQ5aA0hFmeSPOes3s/HrOdLphj21dyPguPUdX+rhe+adfgxaa9UgY4qZ4+yVk3O9visrQXLA5qj1VlNKbLwE/8Z2oCTnUuMPhwHscr/ogihMViOJkBPhU2YVQqssIMhmMMhzc5TvBRhRF56jXhLBKNk1k8mJvNKIoWkBHsQ0TXq+lPcQx3WmkKNnzQigKqCiUHqhAFCcqEMWJCkRxogJRnKhAFCcqEMXJCNV+pafiZpqC33w1QvYLbpTqs4r2dxOf8J3BCDIpvjIcPOY7wRHgL74TVYJiuwjf9Z24xqTWH/t1Ht6fyqtAhovCgpZVIPXnaO9D+seMi+l4T0gB2CLUACW/HAd+UUTCRUzFfTfwI+BDwPuA7wG3AxeAtyOj16aR8LinfGeu+EXnalecaFe74kQFojhRgShOVCCKExWI4kQFojhRgShOVCCKExWI4kQFojhRgShOVCCKExWI4kQFojhRgShOVCCKk14CiQJ/TsfLC8A3/Jxi7Wki/8lewl2HVrzMFVEWOuTsDLAuzncn8Ejg/KvES8C1JeQ7hYzYa+QViD32IiTnkQnq7ysh77IxF6ZJOdOUNiCfD9IgnDheTm1fikwO+0yg/KuCuSlBxLEvUL7H4uWM2ZE3aPlPwM0UOyzCcAy4qsv+M8j7Uoad9AUx5j4kbw5LyduK+TBhxHEYEUcLOJn6zvglw4xxEm1Wk1iTEDxpb/TTzLVbFXN+ytKBcciWABsyjhlGkTxFcl7dBpX5quJNHv9O7bcnUb7V/qLfcTH2wVPAaPyZBNb0k5AnhmGEXmjBTwBrkZu8hXQpmJux4//st6PMTmA1IgwQcYScqegP8fIsMmqvjpjqpNAZglKcQcRxErmxlyLiyJxEaDE9qTtJXu53ubU/7TMUwSvx8qPxchmwB3g2QN6+eJB2q7Ga4qrsNOvi5QZEmMuQZvRGMqzxYodevgpcaW2H9LRPAOeA6zO+r2q143pxZFbLrQiOAJtT+7YDu7sdPMjY3Ko5iy3EuZ1BXhV6ELiu1BIJLcRSH0Cc8BXWdxEi6CZhO8PGEasxEZfnLVkHDvKwrkH7e2TLeqes8X1MM3xlvJwmqee/HLhM/7XyNv/xNuRi2P+TeU/vWKiCxWxELNpaHOKAwZ/mvmCtp19aHIqs/pkbrfUfklywInpl76P9YdfV1nct2vsxVqTWQ/kf0O4Qj5KjOvYx/YNJwDyvMaYexGu+jDCdbD64ney3WN8GfALxFa6j3UGvCqZ6TXMeeWxhmEcE0hNf84NUzR8piiZy16/ocVyZ2H1SLaQTzDjHZ5Fq5a/Ae/Mk5itgyJgqu359zlrf4ymfopmle39OK/5ujGqLA9rFsYREHNOI1XuNnOIA/zMMmY4f0+Q9CGz1mYGSm27N2QX6rO6LmIIqQu42c6fVVSQtxDLWKSzT9v9AfJJRa1/ffURFnHyDdjO8FfhdAfkUzRLqJQ6QMjet7Zl43+9ZZAdikZPYRcAfgY8UlYHSkwh4ArhjsQkUPcthurpRisU0c+cR53Qc2DRIgkWbUFcdPo++q6Zfmtb6kS77TR/IMsQhHUgcEKaOTfewmtePLEPqR9O0PBCgLHVnLF4uIC2UceA/dHbVT+OpczKUE9ZAelUB3hUvJxGTuAI5mW2ByjIMjCBzs1+CzF5tmEQi/5zPV/phae9DvLEecVhNsE+LcqLQ6o4JDVhOZyjiJb4zK2sq7nSm5xGx1K1ZWRaHgC2pfYXEwZR1QRokgbKHkAdJKo7eTMTLLcj/Nw48QIFBUlWYzD9C6s4J2h+TK9k8j/hyhUfPVeGuNRFVKo7emBFvuwkUWlkFC2LjGgdc1tCKkJgQRJCbpkV73MlZksDjIFTBgtg0gC/E601r/4sk4ngFafvb1KXDbRZp7meFZzaQt0cdR/o2jDiOxd8FFQdUz4LY/Bm4ydpuIdHs6zK2yxjD2i/pp632Y4jjSP/FWOo3pUbpV1kghh8Dn2V4nuecQfqfxqx9TSomDEMdBGLTbWzJAlJVhhxb4otxpAPRWJW+A3qKpmo+SC9MJPZBa585hzqI41hqeyMiiM8h51UpcUD9LEiabyOxDtdQ3ixI/WL7HZWoRlzUXSA2dwK7yi5ED4I3UwelblWMi8eRO9J8dhF24hXoHAQ1QVJ9lNJMHZRhsiB5+C1wBfAOOgc+zdF7MNEU0gJJt6hayID2HyCj+IaGi00gvfg8IoA1JCKYRXpx3wB+VlK5SuP/jKEey59zpW4AAAAASUVORK5CYII=" alt="eFootball">
+        </div>
+
+        <div class="t-body">
+          <div class="phase">
+            <div class="phase-left">
+              <span class="phase-dot"></span>
+              <span>Phase 1 Knockouts</span>
+              <span class="seed">32 Seeds</span>
+            </div>
+            <div class="prize">PRIZE ₹850</div>
+          </div>
+
+          <h2 class="event-title">EFOOTBALL WORLD TOURNAMENT</h2>
+          <p class="event-sub">Mobile Direct Qualifier • Authentic Team Selection</p>
+
+          <div class="schedule">
+            <span>⏱ <strong>This Fri & Sat</strong> (10:00 AM)</span>
+            <span class="entry">ENTRY: ₹30</span>
+          </div>
+
+          <div class="quick-actions">
+            <button class="quick-btn" type="button" onclick="event.stopPropagation(); openRules()">
+              <span class="qico">📜</span>
+              <span>Rules</span>
+            </button>
+            <button class="quick-btn" type="button" onclick="event.stopPropagation(); switchView('calendar')">
+              <span class="qico">📅</span>
+              <span>Schedule</span>
+            </button>
+            <button class="quick-btn primary" type="button" onclick="event.stopPropagation(); openTournamentDetail()">
+              <span class="qico">⚡</span>
+              <span>Enter</span>
+            </button>
+          </div>
+
+          <div class="register-strip" onclick="event.stopPropagation(); openTournamentDetail()">
+            <div>
+              <strong>READY TO COMPETE?</strong>
+              <span>Open registration & tournament details</span>
+            </div>
+            <div class="go">➜</div>
+          </div>
+
+          <div class="mobile-dock-note">Built for touch • fast actions • mobile tournament flow</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ========================== DETAIL ========================== -->
+    <section id="viewDetail" class="hidden">
+      <div class="panel detail">
+        <span class="stage" style="border-color:rgba(255,64,86,.4);background:rgba(255,64,86,.08);color:#ff6b7b">Stage 1 Qualifier</span>
+        <h2>EFOOTBALL WORLD TOURNAMENT</h2>
+        <p>Authentic Team Selection • 32 Player Knockout</p>
+
+        <div class="grid2" style="margin-top:13px">
+          <div class="stat"><small>Prize Pool</small><div class="money gold">₹850</div></div>
+          <div class="stat"><small>Entry Pass</small><div class="money">₹30</div></div>
+        </div>
+
+        <div class="actions">
+          <button class="secondary" onclick="openPrizeModal()">🏆 Prize Matrix</button>
+          <button class="secondary" onclick="openRules()">📜 Match Rules</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:12px">
+        <div class="hud" style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Tournament Entry Pass</div>
+        <p style="margin:5px 0 0;color:var(--muted);font-size:10px">Complete verification to enter the official live draw.</p>
+
+        <form id="regForm" onsubmit="handleRegistration(event)">
+          <div class="form-group">
+            <label for="ign">In-Game Name (IGN)</label>
+            <input class="field" id="ign" required placeholder="e.g. Aparajito">
+          </div>
+
+          <div class="form-group">
+            <label for="regPhone">WhatsApp Phone Number</label>
+            <input class="field" id="regPhone" required readonly>
+          </div>
+
+          <div class="form-group">
+            <label for="gameId">eFootball Unique Owner ID</label>
+            <input class="field hud" id="gameId" required placeholder="e.g. 123-456-789">
+          </div>
+
+          <div class="pay-box">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span style="color:#78849a;font:700 9px 'Chakra Petch',sans-serif;letter-spacing:.12em;text-transform:uppercase">Entry Fee</span>
+              <span style="color:var(--green);font:700 10px 'Chakra Petch',sans-serif">₹30 FIXED</span>
+            </div>
+
+            <div class="upi-row">
+              <div>
+                <div style="color:#657085;font-size:8px;text-transform:uppercase;letter-spacing:.1em">Tournament UPI</div>
+                <strong class="hud">eafc@ptaxis</strong>
+              </div>
+              <button id="copyBtn" type="button" class="copy" onclick="copyUPI()">Copy UPI</button>
+            </div>
+
+            <div style="margin-top:10px;color:#8490a4;font-size:9px;line-height:1.65">
+              1. Copy the official UPI ID.<br>
+              2. Pay ₹30 using your preferred UPI app.<br>
+              3. Take a full payment screenshot.
+            </div>
+
+            <div class="payment-warning">
+              <strong>Manual Verification Required:</strong> Payment screenshot must be sent to WhatsApp number <strong>8479006531</strong> for manual verification. Approximate verification time is <strong>2 minutes</strong>.
+            </div>
+          </div>
+
+          <button id="submitBtn" class="enter-btn" type="submit">Submit & Send Screenshot ➜</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ========================== CALENDAR ========================== -->
+    <section id="viewCalendar" class="hidden">
+      <div style="margin-bottom:12px">
+        <div class="hud" style="color:#ff6375;font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase">Official Schedule</div>
+        <h2 class="hud" style="margin:3px 0 0;font-size:20px">Tournament Timeline</h2>
+      </div>
+
+      <div class="timeline">
+        <div class="time-card">
+          <div class="hud" style="color:#ff6676;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Friday • 10:00 AM</div>
+          <strong>Group Stage Matches</strong>
+          <p>8 groups of 4 players. 6-minute matches with authentic squads.</p>
+        </div>
+
+        <div class="time-card gold-line">
+          <div class="hud" style="color:#ffc64d;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Saturday • 10:00 AM</div>
+          <strong>Round of 16 & Quarter Finals</strong>
+          <p>Top players advance. Extra time and penalties enabled in knockouts.</p>
+        </div>
+
+        <div class="time-card green-line">
+          <div class="hud" style="color:#40e3aa;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Sunday • 06:00 PM</div>
+          <strong>Semi-Finals & Grand Final</strong>
+          <p>Championship decider followed by final prize distribution.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================== PROFILE ========================== -->
+    <section id="viewProfile" class="hidden">
+      <div class="panel">
+        <div class="avatar">👤</div>
+        <div id="profilePhoneText" class="profile-phone">+91 ----------</div>
+        <div class="verified">● VERIFIED WHATSAPP IDENTITY</div>
+
+        <div style="margin-top:14px;display:grid;gap:8px">
+          <div class="stat"><small>Registered Number</small><strong id="profilePhoneVal">---</strong></div>
+          <div class="stat"><small>Current Status</small><strong style="color:var(--green)">Active Competitor</strong></div>
+          <div class="stat"><small>Platform</small><strong>eFootball 2027 Mobile</strong></div>
+        </div>
+
+        <button class="secondary" onclick="handleLogout()" style="width:100%;margin-top:13px;color:#ff6576;border-color:rgba(255,64,86,.24)">Log Out Account</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================== NAV ========================== -->
+  <nav class="nav">
+    <button id="navTournaments" class="active" onclick="switchView('tournaments')"><span class="ico">🏆</span><span>Arena</span></button>
+    <button id="navCalendar" onclick="switchView('calendar')"><span class="ico">📅</span><span>Calendar</span></button>
+    <button id="navProfile" onclick="switchView('profile')"><span class="ico">👤</span><span>Profile</span></button>
+  </nav>
+</div>
+
+<!-- ========================== RULES ========================== -->
+<div id="rulesModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="hud" style="color:#ff6677;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase">eFootball 2027 Mobile</div>
+        <h3>Competitive Rulebook</h3>
+      </div>
+      <button class="close" onclick="closeRules()">✕</button>
+    </div>
+    <div class="rule"><strong>1. Team Selection</strong><p>Authentic teams only. Squad assignments are handled via a fair live lottery.</p></div>
+    <div class="rule"><strong>2. Group Stage</strong><p>6-minute matches. Extra time OFF. Penalties OFF.</p></div>
+    <div class="rule"><strong>3. Knockout Stage</strong><p>Extra time ON. Penalties ON. Bracket progress is tracked throughout the event.</p></div>
+    <div class="rule"><strong>4. Punctuality</strong><p>A strict 10-minute reporting grace period applies before a forfeit may be issued.</p></div>
+    <button class="secondary" onclick="closeRules()" style="width:100%;margin-top:11px">Acknowledge & Close</button>
+  </div>
+</div>
+
+<!-- ========================== PRIZE ========================== -->
+<div id="prizeModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="hud" style="color:#ffc95d;font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase">Official Prize Allocation</div>
+        <h3>Championship Prize Matrix</h3>
+      </div>
+      <button class="close" onclick="closePrizeModal()">✕</button>
+    </div>
+
+    <div class="prize-summary">
+      <div class="prize-summary-top">
+        <div>
+          <div class="prize-summary-label">Guaranteed Tournament Pool</div>
+          <div class="prize-total">₹850</div>
+        </div>
+        <div class="verified-pill" style="color:#ffd36f;border-color:rgba(255,200,87,.22);background:rgba(255,200,87,.06)">100% Allocated</div>
+      </div>
+      <div class="prize-summary-note">Final standings are confirmed by tournament admins before payout. Prize allocation shown below is fixed for this event.</div>
+    </div>
+
+    <div class="prize-matrix">
+      <div class="podium-row champion">
+        <div class="rank-medal">🥇</div>
+        <div class="rank-copy">
+          <strong>Grand Champion</strong>
+          <span>1st Place • Championship Winner</span>
+        </div>
+        <div class="rank-money">
+          <b>₹500</b>
+          <span>58.8% pool</span>
+        </div>
+      </div>
+
+      <div class="podium-row runner">
+        <div class="rank-medal">🥈</div>
+        <div class="rank-copy">
+          <strong>Runner-Up</strong>
+          <span>2nd Place • Finalist</span>
+        </div>
+        <div class="rank-money">
+          <b>₹200</b>
+          <span>23.5% pool</span>
+        </div>
+      </div>
+
+      <div class="podium-row third">
+        <div class="rank-medal">🥉</div>
+        <div class="rank-copy">
+          <strong>Third Place</strong>
+          <span>3rd Place • Podium Finish</span>
+        </div>
+        <div class="rank-money">
+          <b>₹150</b>
+          <span>17.6% pool</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="matrix-footnote">
+      Prize disbursement is processed after the Grand Final and final result verification by tournament administration.
+    </div>
+
+    <button class="secondary" onclick="closePrizeModal()" style="width:100%;margin-top:11px">Close Prize Matrix</button>
+  </div>
+</div>
+
+<!-- ========================== SUCCESS ========================== -->
+<div id="successModal" class="modal hidden">
+  <div class="modal-card" style="text-align:center">
+    <div style="width:56px;height:56px;border-radius:17px;margin:0 auto 11px;display:grid;place-items:center;background:rgba(56,226,164,.09);border:1px solid rgba(56,226,164,.24);color:var(--green);font-size:26px">✓</div>
+    <h3 class="hud" style="margin:0;font-size:19px">ENTRY REGISTERED</h3>
+    <p style="color:var(--muted);font-size:10px;line-height:1.55">Send your ₹30 payment screenshot to the moderator for verification.</p>
+    <a id="waDirectBtn" href="#" target="_blank" style="display:block;text-decoration:none" class="enter-btn">Send Screenshot on WhatsApp ➜</a>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzs5U0TosdZuRIuagceRDHaeYqAMIHiKz-exZrgdgqaSb7WluAn_2w6J9d-w7zzYBI0sg/exec";
+
+  function switchView(viewName) {
+    const views = {
+      tournaments: document.getElementById("viewTournaments"),
+      detail: document.getElementById("viewDetail"),
+      calendar: document.getElementById("viewCalendar"),
+      profile: document.getElementById("viewProfile")
+    };
+
+    Object.values(views).forEach(v => v.classList.add("hidden"));
+    document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+
+    const backBtn = document.getElementById("backBtn");
+    const headerLogo = document.getElementById("headerLogo");
+
+    if (viewName === "detail") {
+      views.detail.classList.remove("hidden");
+      backBtn.classList.remove("hidden");
+      headerLogo.classList.add("hidden");
+    } else {
+      views[viewName].classList.remove("hidden");
+      backBtn.classList.add("hidden");
+      headerLogo.classList.remove("hidden");
+
+      if (viewName === "tournaments") document.getElementById("navTournaments").classList.add("active");
+      if (viewName === "calendar") document.getElementById("navCalendar").classList.add("active");
+      if (viewName === "profile") document.getElementById("navProfile").classList.add("active");
+    }
+
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function openTournamentDetail() { switchView("detail"); }
+
+  function handleLogin() {
+    const phone = document.getElementById("loginPhone").value.trim().replace(/\D/g, "");
+    if (phone.length !== 10) {
+      alert("Please enter a valid 10-digit WhatsApp number.");
+      return;
+    }
+    localStorage.setItem("ef_user_phone", phone);
+    applyUserSession(phone);
+  }
+
+  function applyUserSession(phone) {
+    document.getElementById("authScreen").classList.add("hidden");
+    document.getElementById("userBadge").textContent = `+91 ${phone}`;
+    document.getElementById("regPhone").value = phone;
+    document.getElementById("profilePhoneText").textContent = `+91 ${phone}`;
+    document.getElementById("profilePhoneVal").textContent = `+91 ${phone}`;
+    checkActiveRegistrations(phone);
+    switchView("tournaments");
+  }
+
+  function handleLogout() {
+    if (confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem("ef_user_phone");
+      localStorage.removeItem("ef_active_registration");
+      location.reload();
+    }
+  }
+
+  function checkActiveRegistrations(phone) {
+    const regData = localStorage.getItem("ef_active_registration");
+    const box = document.getElementById("activeRegContainer");
+
+    if (!regData) {
+      box.classList.add("hidden");
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(regData);
+      if (parsed.phone === phone) {
+        box.classList.remove("hidden");
+        document.getElementById("regPlayerIgn").textContent = parsed.ign || "---";
+        document.getElementById("regPlayerId").textContent = parsed.gameId || "---";
+      } else {
+        box.classList.add("hidden");
+      }
+    } catch (e) {
+      box.classList.add("hidden");
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const savedPhone = localStorage.getItem("ef_user_phone");
+    if (savedPhone) applyUserSession(savedPhone);
+  });
+
+  function openRules() { document.getElementById("rulesModal").classList.remove("hidden"); }
+  function closeRules() { document.getElementById("rulesModal").classList.add("hidden"); }
+  function openPrizeModal() { document.getElementById("prizeModal").classList.remove("hidden"); }
+  function closePrizeModal() { document.getElementById("prizeModal").classList.add("hidden"); }
+
+  function copyUPI() {
+    const value = "eafc@ptaxis";
+    const btn = document.getElementById("copyBtn");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = value;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+
+    const old = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = old, 1500);
+  }
+
+  async function handleRegistration(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("submitBtn");
+    const ign = document.getElementById("ign").value.trim();
+    const phone = document.getElementById("regPhone").value.trim();
+    const gameId = document.getElementById("gameId").value.trim();
+
+    if (!ign || !phone || !gameId) return;
+
+    btn.textContent = "Processing Entry...";
+    btn.disabled = true;
+
+    const payload = {
+      name: ign,
+      phone,
+      gameId,
+      txnId: "Screenshot on WhatsApp"
+    };
+
+    try {
+      if (SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      localStorage.setItem("ef_active_registration", JSON.stringify({
+        phone,
+        ign,
+        gameId,
+        tournament:"EFOOTBALL WORLD TOURNAMENT"
+      }));
+
+      const waMsg =
+`🏆 *eFootball World Tournament - Verification Request*
+
+• *IGN:* ${ign}
+• *Owner ID:* ${gameId}
+• *Registered Phone:* ${phone}
+• *Fee Paid:* ₹30
+
+_I have attached my ₹30 payment screenshot below. Please verify and send the Main Draw Group link._`;
+
+      document.getElementById("waDirectBtn").href =
+        `https://wa.me/918479006531?text=${encodeURIComponent(waMsg)}`;
+
+      document.getElementById("successModal").classList.remove("hidden");
+      checkActiveRegistrations(phone);
+    } catch (err) {
+      alert("Submission failed. Please message 8479006531 directly on WhatsApp.");
+    } finally {
+      btn.textContent = "Submit & Send Screenshot ➜";
+      btn.disabled = false;
+    }
+  }
+
+  function attachMobileInteractions() {
+    const tappables = document.querySelectorAll(".tap-card, .quick-btn, .register-strip, .secondary, .enter-btn, .copy, .nav button");
+
+    tappables.forEach(el => {
+      el.addEventListener("pointerdown", (e) => {
+        if (el.classList.contains("tap-card")) {
+          const rect = el.getBoundingClientRect();
+          el.style.setProperty("--tap-x", `${e.clientX - rect.left}px`);
+          el.style.setProperty("--tap-y", `${e.clientY - rect.top}px`);
+        }
+        el.classList.add("is-tapping");
+        if (navigator.vibrate) navigator.vibrate(8);
+      });
+
+      const clear = () => el.classList.remove("is-tapping");
+      el.addEventListener("pointerup", clear);
+      el.addEventListener("pointercancel", clear);
+      el.addEventListener("pointerleave", clear);
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    attachMobileInteractions();
+  });
+
+</script>
+</body>
+</html>
